@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pymupdf
 import os
+class TextInput(BaseModel):
+    text: str
 app = FastAPI()
 
 app.add_middleware(
@@ -27,6 +29,12 @@ async def upload_doc(file: UploadFile = File(...)):
     print(text)
     return {"text": text}
 
+@app.post("/rag")
+def rag_setup(request: TextInput):
+    text = request.text
+    #connect the rag agent here
+    return {"message": "document has been succesfully processed "}
+    
 
 if __name__ == "__main__":
     import uvicorn
