@@ -11,6 +11,12 @@ fastapi = "^0.115.12"
 uvicorn = "^0.34.1"
 python-multipart = "^0.0.20"
 pymupdf = "^1.25.5"
+langchain = "^0.3.25"
+langchain-community = "^0.3.23"
+langchain-chroma = "^0.2.3"
+langchain-openai = "^0.3.16"
+
+
 
 
 [build-system]
