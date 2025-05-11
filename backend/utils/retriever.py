@@ -15,7 +15,6 @@ from langchain_openai import OpenAIEmbeddings
 from langchain.schema import Document
 from dotenv import load_dotenv
 load_dotenv()
-llm = ChatOpenAI(model="gpt-4o")
 text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(chunk_size=1000,chunk_overlap=200)
 embeddings = OpenAIEmbeddings()
 vector_db = Chroma(

@@ -5,7 +5,12 @@ import pymupdf
 import os
 from utils.retriever import index_to_vector_db,make_retreiver
 from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+
 load_dotenv()
+
+llm = ChatOpenAI(model="gpt-4o")
+
 class TextInput(BaseModel):
     text: str
     user_id: str
@@ -50,8 +55,15 @@ def rag_setup(request: TextInput):
 @app.post("/rag/retriever")
 def retriever(request: RetrieverInput):
     retriever = make_retreiver(user_id=request.user_id,subject=request.subject)
-    docs = retriever.get_relevant_documents(request.question)
-    return {"results": [d.page_content for d in docs]}
+    docs = retriever.invoke(request.question)
+    system_prompt = f"""
+    you are a answering assistant for students. based on the question: {request.question},
+    and the retrieved documents:{docs}. formulate an answer only based on the documents provided to you.
+
+"""
+    result = llm.invoke(system_prompt)
+    print(result.content)
+    return result.content
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, port=8000)
