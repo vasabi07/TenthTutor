@@ -1,0 +1,115 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(uuid())
+  username       String          @unique
+  email          String          @unique
+  password       String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  documents      Document[]
+  questionpapers QuestionPaper[]
+  answerpapers   AnswerPaper[]
+}
+
+model Topic {
+  id             String          @id @default(uuid())
+  name           String          @unique
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  documents      Document[]
+  subtopic       Subtopic[]
+  questionpapers QuestionPaper[]
+  answerpapers   AnswerPaper[]
+}
+
+model Subtopic {
+  id             String          @id @default(uuid())
+  name           String          @unique
+  documents      Document[]
+  questionpapers QuestionPaper[]
+  answerpapers   AnswerPaper[]
+  topicId        String
+  topic          Topic           @relation(fields: [topicId], references: [id])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model Document {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  topicId    String
+  topic      Topic     @relation(fields: [topicId], references: [id])
+  subtopicId String
+  subtopic   Subtopic? @relation(fields: [subtopicId], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Question {
+  id        String   @id @default(uuid())
+  text      String
+  position  Int
+  questionpaperId String
+  questionpaper QuestionPaper @relation(fields: [questionpaperId],references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Answer {
+  id         String   @id @default(uuid())
+  text       String
+  mark       Float?
+  llmRemark  String?
+  strengths  String?
+  weaknesses String?
+  answerpaperId String
+  answerpaper AnswerPaper @relation(fields: [answerpaperId],references: [id])
+  createdAt  DateTime @default(now())
+}
+
+model QuestionPaper {
+  id           String        @id @default(uuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  topicId      String
+  topic        Topic         @relation(fields: [topicId], references: [id])
+  subtopicId   String
+  subtopic     Subtopic?     @relation(fields: [subtopicId], references: [id])
+  answerpapers AnswerPaper[]
+  questions Question[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model AnswerPaper {
+  id              String        @id @default(uuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  topicId         String
+  topic           Topic         @relation(fields: [topicId], references: [id])
+  subtopicId      String
+  subtopic        Subtopic?     @relation(fields: [subtopicId], references: [id])
+  questionpaperId String
+  questionpaper   QuestionPaper @relation(fields: [questionpaperId], references: [id])
+  answers Answer[]
+  finalscore Float? 
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+
