@@ -52,14 +52,14 @@ def index_to_vector_db(request: TextInput):
             "error": str(e),
         }
 
-def make_retreiver(user_id:str,subject:str):
+def make_retreiver(user_id:str,topic_id:str):
     combined = {
         "$and": [
             {"user_id": user_id},
-            {"subject": subject},
+            {"topic_id": topic_id},
         ]
     }
-    return vector_db.as_retriever(search_type="mmr",search_kwargs= {"k": 3, "filter":combined })
+    return vector_db.as_retriever(search_type="mmr",search_kwargs= {"k": 20, "filter":combined })
 
 
 
