@@ -123,6 +123,7 @@ class Answer(SQLModel, table=True):
 
     id: str = Field(default_factory=lambda: str(uuid4()), primary_key=True)
     text: str = Field(nullable=False)
+    position: int = Field(nullable=False)
     mark: Optional[float] = Field(default=None)
     llmRemark: Optional[str] = Field(default=None)
     strengths: Optional[str] = Field(default=None)

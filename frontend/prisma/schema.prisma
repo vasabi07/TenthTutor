@@ -73,6 +73,7 @@ model Question {
 model Answer {
   id         String   @id @default(uuid())
   text       String
+  position   Int
   mark       Float?
   llmRemark  String?
   strengths  String?
