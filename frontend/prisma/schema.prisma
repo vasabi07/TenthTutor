@@ -67,20 +67,23 @@ model Question {
   position  Int
   questionpaperId String
   questionpaper QuestionPaper @relation(fields: [questionpaperId],references: [id])
+  answers Answer[]
   createdAt DateTime @default(now())
 }
 
 model Answer {
   id         String   @id @default(uuid())
   text       String
-  position   Int
   mark       Float?
   llmRemark  String?
   strengths  String?
   weaknesses String?
+  questionId String
+  question Question @relation(fields: [questionId],references: [id])
   answerpaperId String
   answerpaper AnswerPaper @relation(fields: [answerpaperId],references: [id])
   createdAt  DateTime @default(now())
+   @@unique([answerpaperId, questionId])
 }
 
 model QuestionPaper {
@@ -89,7 +92,7 @@ model QuestionPaper {
   user         User          @relation(fields: [userId], references: [id])
   topicId      String
   topic        Topic         @relation(fields: [topicId], references: [id])
-  subtopicId   String
+  subtopicId   String?
   subtopic     Subtopic?     @relation(fields: [subtopicId], references: [id])
   answerpapers AnswerPaper[]
   questions Question[]
@@ -103,8 +106,8 @@ model AnswerPaper {
   user            User          @relation(fields: [userId], references: [id])
   topicId         String
   topic           Topic         @relation(fields: [topicId], references: [id])
-  subtopicId      String
-  subtopic        Subtopic?     @relation(fields: [subtopicId], references: [id])
+  subtopicId      String?
+  subtopic        Subtopic?    @relation(fields: [subtopicId], references: [id])
   questionpaperId String
   questionpaper   QuestionPaper @relation(fields: [questionpaperId], references: [id])
   answers Answer[]

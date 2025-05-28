@@ -104,7 +104,7 @@ class AnswerPaper(SQLModel, table=True):
     id: str = Field(default_factory=lambda: str(uuid4()), primary_key=True)
     userId: str = Field(foreign_key="User.id", nullable=False)
     topicId: str = Field(foreign_key="Topic.id", nullable=False)
-    subtopicId: str = Field(foreign_key="Subtopic.id", nullable=False)
+    subtopicId: Optional[str] = Field(foreign_key="Subtopic.id", nullable=False)
     questionpaperId: str = Field(foreign_key="QuestionPaper.id", nullable=False)
     finalscore: Optional[float] = Field(default=None)
 
@@ -123,7 +123,6 @@ class Answer(SQLModel, table=True):
 
     id: str = Field(default_factory=lambda: str(uuid4()), primary_key=True)
     text: str = Field(nullable=False)
-    position: int = Field(nullable=False)
     mark: Optional[float] = Field(default=None)
     llmRemark: Optional[str] = Field(default=None)
     strengths: Optional[str] = Field(default=None)

@@ -51,9 +51,13 @@ def rag_setup(request: TextInput):
     result = index_to_vector_db(request)
     print(result)
     return {"message": "document has been succesfully processed "}
-    
+
+
+
+#make this endpoint a agentic rag endpoint. call the rag agent here.
 @app.post("/rag/retriever")
 def retriever(request: RetrieverInput):
+    #call the rag agent here instead of the retriever
     retriever = make_retreiver(user_id=request.user_id,subject=request.subject)
     docs = retriever.invoke(request.question)
     system_prompt = f"""
