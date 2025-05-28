@@ -3,10 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pymupdf
 import os
-from utils.retriever import index_to_vector_db,make_retreiver
+from utils.retriever import index_to_vector_db
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-
+from agents.learner_rag_agent import rag_graph
 load_dotenv()
 
 llm = ChatOpenAI(model="gpt-4o-mini")
@@ -18,8 +18,9 @@ class TextInput(BaseModel):
 
 class RetrieverInput(BaseModel):
     user_id: str
-    subject: str
     question: str
+    topic_id: str | None = None 
+
 app = FastAPI()
 
 app.add_middleware(
@@ -46,28 +47,24 @@ async def upload_doc(file: UploadFile = File(...)):
 
 @app.post("/rag")
 def rag_setup(request: TextInput):
-    text = request.text
-    #connect the rag agent here
     result = index_to_vector_db(request)
     print(result)
     return {"message": "document has been succesfully processed "}
 
 
 
-#make this endpoint a agentic rag endpoint. call the rag agent here.
 @app.post("/rag/retriever")
 def retriever(request: RetrieverInput):
-    #call the rag agent here instead of the retriever
-    retriever = make_retreiver(user_id=request.user_id,subject=request.subject)
-    docs = retriever.invoke(request.question)
-    system_prompt = f"""
-    you are a answering assistant for students. based on the question: {request.question},
-    and the retrieved documents:{docs}. formulate an answer only based on the documents provided to you.
-
-"""
-    result = llm.invoke(system_prompt)
-    print(result.content)
-    return result.content
+    result_state = rag_graph.invoke({
+        "userId": request.user_id,
+        "user_query": request.question,
+        "topic_id": request.topic_id,
+    })
+    return {
+        "answer": result_state.answer,
+        "decision": result_state.validator_output.validator_decision,
+        "remarks": result_state.validator_output.validator_remarks,
+    }  
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, port=8000)

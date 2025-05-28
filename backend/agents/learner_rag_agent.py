@@ -16,9 +16,9 @@ class State(MessagesState):
     retrieved_docs: List[Document] = Field(default_factory=list)
     planner_prompt: str | None = None
     answer: str | None = None
-    validator_output: Optional[Validator] 
+    validator_output: Validator = Field(default_factory=Validator)
     topic_id: str | None = None
-    
+    loop: int = 0
     
 
 #planner node
@@ -42,7 +42,7 @@ def retrieval_node(state:State)-> State:
 #answer node
 def answer_node(state:State):
    
-    if state.validator_output.validator_decision == "Rejected":
+    if state.validator_output.validator_decision == "Rejected" and state.loop <=3:
         system_prompt = f"""You are a helpful learning assistant. There are remarks to your previous answer: {state.answer}
 For these Documents: {"\n".join(d.page_content for d in state.retrieved_docs)}
 User query: {state.user_query}
@@ -50,7 +50,7 @@ Remark: {state.validator_output.validator_remarks}
 Consider the remark and create an appropriate answer"""
         answer = llm.invoke(system_prompt)
         state.answer = answer
-        
+        state.loop = state.loop + 1    
     else:
         system_prompt = f"""
         You are a helpful learning assistant. From the following retrieved documents, answer the user query.
@@ -85,8 +85,8 @@ workflow.add_node("validator",validator_node)
 workflow.add_edge("planner","retrieval")
 workflow.add_edge("retrieval","answer")
 workflow.add_edge("answer","validator")
-workflow.add_conditional_edges("validator",lambda s:  "answer" if s.validator_output.validator_decision== "Rejected" else END)
+workflow.add_conditional_edges("validator",lambda s:  "answer" if s.validator_output.validator_decision== "Rejected" and s.loop < 3 else END)
 
 workflow.set_entry_point("planner")
 
-graph = workflow.compile()
+rag_graph = workflow.compile()
